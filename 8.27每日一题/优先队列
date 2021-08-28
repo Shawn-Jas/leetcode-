@@ -1,0 +1,75 @@
+中位数是有序列表中间的数。如果列表长度是偶数，中位数则是中间两个数的平均值。
+
+例如，
+
+[2,3,4] 的中位数是 3
+
+[2,3] 的中位数是 (2 + 3) / 2 = 2.5
+
+设计一个支持以下两种操作的数据结构：
+
+void addNum(int num) - 从数据流中添加一个整数到数据结构中。
+double findMedian() - 返回目前所有元素的中位数。
+示例：
+
+addNum(1)
+addNum(2)
+findMedian() -> 1.5
+addNum(3) 
+findMedian() -> 2
+进阶:
+
+如果数据流中所有整数都在 0 到 100 范围内，你将如何优化你的算法？
+如果数据流中 99% 的整数都在 0 到 100 范围内，你将如何优化你的算法？
+#
+#
+#
+#题解：
+找中位数一类的题想到用优先队列，小于等于中位数的放在minQueue，大于中位数的放在maxQueue。这样有两种情况：
+1.minQueue.size()和maxQueue.size()相等，说明总数为偶数，中位数为两队列1队首的平均数
+2.minQueue恰好比macQueue多1个，说明总数为奇数,中位数为minQueue队首。
+class MedianFinder {
+    PriorityQueue<Integer> minQueue;//小于等于中位数的队列，队首为最大值
+    PriorityQueue<Integer> maxQueue;//大于中位数的队列，队首为最小值
+    public MedianFinder() {
+        minQueue=new PriorityQueue<Integer>(10,MyComparator1);
+        maxQueue=new PriorityQueue<Integer>(10,MyComparator2);
+    }
+    public static Comparator<Integer> MyComparator2=new Comparator<Integer>(){
+        public int compare(Integer i1,Integer i2){
+            return (int)(i1.intValue()-i2.intValue());
+        }
+    };//匿名内部类实现比较器
+    
+    public static Comparator<Integer> MyComparator1=new Comparator<Integer>(){
+        public int compare(Integer i1,Integer i2){
+            return (int)(i2.intValue()-i1.intValue());
+        }
+    };
+    
+    public void addNum(int num) {
+        if(minQueue.isEmpty()||num<=minQueue.peek()){
+            minQueue.offer(num);
+            if(maxQueue.size()+1<minQueue.size()){
+                maxQueue.offer(minQueue.poll());
+            }
+        }
+        else{
+            maxQueue.offer(num);
+            if(minQueue.size()<maxQueue.size()){
+                minQueue.offer(maxQueue.poll());
+            }
+        }
+    }
+    
+    public double findMedian() {
+        if(maxQueue.size()==minQueue.size()){
+            return (maxQueue.peek()+minQueue.peek())/2.0;//不要写成2，返回double类型
+        }
+        else{
+            return minQueue.peek();
+        }
+        
+    }
+    
+}
