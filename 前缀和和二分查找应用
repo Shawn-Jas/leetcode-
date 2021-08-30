@@ -1,0 +1,48 @@
+给定一个正整数数组 w ，其中 w[i] 代表下标 i 的权重（下标从 0 开始），请写一个函数 pickIndex ，它可以随机地获取下标 i，选取下标 i 的概率与 w[i] 成正比。
+
+例如，对于 w = [1, 3]，挑选下标 0 的概率为 1 / (1 + 3) = 0.25 （即，25%），而选取下标 1 的概率为 3 / (1 + 3) = 0.75（即，75%）。
+
+也就是说，选取下标 i 的概率为 w[i] / sum(w) 。
+
+
+
+问题一 如何实现概率
+  数组中每个数的大小为其权重，所占总数的比例越大，被抽中的概率越高。用total表示数组元素总和，[1,total]这个区间被不同的元素占有：比如对于w=[3,1,2,4]，total=10，所以1，10的区间
+  被划分为：（1，3）（4，4）（5，6）（7，10） 可见元素的数值越大所占区间越长，在1-10中随机取数，取到对应区间就返回对应下标。
+  
+  每个区间的右界为对应下标的前缀和，如1上例preSum=[3,4,6,10]。
+
+问题二 如何实现查找
+  采用二分查找，可以在log n复杂度内找出所求下标
+  
+ class Solution {
+    int[] preSum;
+    int total;
+    public Solution(int[] w) {
+        preSum=new int[w.length];
+        total=0;
+        preSum[0]=w[0];
+        for(int i=1;i<w.length;i++){
+            preSum[i]=w[i]+preSum[i-1];
+            total = Arrays.stream(w).sum();
+        }
+    }
+    
+    public int pickIndex() {
+        int x = (int) (Math.random() * total) + 1;
+        return searchIndex(x);
+    }
+    public int searchIndex(int x){
+        int left=0;
+        int right=preSum.length-1;
+        int mid=(right-left)/2+left;
+        while(left<right){
+            if(x>preSum[mid]){
+                left=mid+1;
+            }else{
+                right=mid;
+            }
+        }
+        return left;
+    }
+}
